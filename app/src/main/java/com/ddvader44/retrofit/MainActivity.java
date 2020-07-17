@@ -32,8 +32,44 @@ public class MainActivity extends AppCompatActivity {
 
         jsonApi = retrofit.create(JsonApi.class);
 
-        getPosts();
-        getComments();
+       // getPosts();
+        //getComments();
+        createPosts();
+    }
+
+    private void createPosts() {
+        Post post = new Post(44,"ddvader","Android Rocks!");
+
+        Call<Post> call = jsonApi.createPost(44,"ddvader44","Android Trails");
+        call.enqueue(new Callback<Post>() {
+            @Override
+            public void onResponse(Call<Post> call, Response<Post> response) {
+                if(!response.isSuccessful())
+                {
+                    textViewResult.setText("Code: "+ response.code());
+                    return;
+                }
+
+                Post postResponse = response.body();
+
+
+                    String content="";
+                    content += "Code: "+response.code()+"\n";
+                    content += "ID: "+postResponse.getId()+"\n";
+                    content += "User ID: "+postResponse.getUserId()+"\n";
+                    content += "Title: "+postResponse.getTitle()+"\n";
+                    content += "Text: "+postResponse.getText()+"\n\n";
+
+                    textViewResult.setText(content);
+
+
+            }
+
+            @Override
+            public void onFailure(Call<Post> call, Throwable t) {
+                textViewResult.setText(t.getMessage());
+            }
+        });
     }
 
     private void getPosts() {
