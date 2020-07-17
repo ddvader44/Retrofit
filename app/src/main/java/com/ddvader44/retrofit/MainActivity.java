@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private void createPosts() {
         Post post = new Post(44,"ddvader","Android Rocks!");
 
-        Call<Post> call = jsonApi.createPost(44,"ddvader44","Android Trails");
+        Call<Post> call = jsonApi.createPost(44,"ddvader44","Android Trials");
         call.enqueue(new Callback<Post>() {
             @Override
             public void onResponse(Call<Post> call, Response<Post> response) {
