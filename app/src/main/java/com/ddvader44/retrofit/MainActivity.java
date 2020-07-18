@@ -6,8 +6,17 @@ import android.os.Bundle;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -25,17 +34,35 @@ public class MainActivity extends AppCompatActivity {
 
         textViewResult = findViewById(R.id.text_view_result);
 
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .addInterceptor(new Interceptor() {
+                    @NotNull
+                    @Override
+                    public okhttp3.Response intercept(@NotNull Chain chain) throws IOException {
+                        Request originalRequest = chain.request();
+                        Request newRequest = originalRequest.newBuilder()
+                                .header("Interceptor-Header","xyz")
+                                .build();
+                        return chain.proceed(newRequest);
+                    }
+                })
+                .addInterceptor(loggingInterceptor)
+                .build();
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://jsonplaceholder.typicode.com/")
                 .addConverterFactory(GsonConverterFactory.create())
+                .client(okHttpClient)
                 .build();
 
         jsonApi = retrofit.create(JsonApi.class);
 
-       // getPosts();
-        //getComments();
-        //createPosts();
-        //updatePost();
+        getPosts();
+        getComments();
+        createPosts();
+        updatePost();
         deletePost();
     }
 
@@ -56,7 +83,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void updatePost() {
         Post post = new Post(12,null,"New");
-        Call<Post> call = jsonApi.putPost(3,post);
+        Map<String,String> headers = new HashMap<>();
+        headers.put("YO","ddvader44");
+        headers.put("HEY","ddvader44");
+        Call<Post> call = jsonApi.patchPost(headers,5,post);
         call.enqueue(new Callback<Post>() {
             @Override
             public void onResponse(Call<Post> call, Response<Post> response) {
